@@ -20,6 +20,20 @@ process.stdin.on("keypress", (str, key) => {
         }
         process.exit(0);
     }
+
+    // Play next song on Right Arrow (→)
+    if (key && key.name === "right") {
+        nextSong();
+        showInterface();
+        process.stdout.write("\nEnter your choice: ");
+    }
+
+    // Play previous song on Left Arrow (←)
+    if (key && key.name === "left") {
+        prevSong();
+        showInterface();
+        process.stdout.write("\nEnter your choice: ");
+    }
 });
 
 rl.on("close", () => {
@@ -36,6 +50,26 @@ const songs = [
 ];
 
 let currentSong = null;
+
+function nextSong() {
+    if (songs.length === 0) return;
+    const currentIndex = songs.indexOf(currentSong);
+    if (currentIndex === -1 || currentIndex >= songs.length - 1) {
+        currentSong = songs[0];
+    } else {
+        currentSong = songs[currentIndex + 1];
+    }
+}
+
+function prevSong() {
+    if (songs.length === 0) return;
+    const currentIndex = songs.indexOf(currentSong);
+    if (currentIndex <= 0) {
+        currentSong = songs[songs.length - 1];
+    } else {
+        currentSong = songs[currentIndex - 1];
+    }
+}
 
 function showInterface() {
     console.clear();
@@ -69,8 +103,8 @@ function showInterface() {
     console.log("Commands:");
     console.log("1 → Play");
     console.log("2 → Pause");
-    console.log("3 → Next");
-    console.log("4 → Previous");
+    console.log("3 → Next (or → key)");
+    console.log("4 → Previous (or ← key)");
     console.log("5 → Show Playlist");
     console.log("6 → Exit (or press 'q')");
     console.log("----------------------------------------");
@@ -91,12 +125,14 @@ function askCommand() {
         }
 
         else if (choice === "3") {
-            console.log("\n⏭ Next song.");
+            nextSong();
+            console.log(`\n⏭ Next song: ${currentSong}`);
             askAgain();
         }
 
         else if (choice === "4") {
-            console.log("\n⏮ Previous song.");
+            prevSong();
+            console.log(`\n⏮ Previous song: ${currentSong}`);
             askAgain();
         }
 
