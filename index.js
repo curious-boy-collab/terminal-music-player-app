@@ -5,6 +5,29 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+// Enable keypress events and raw mode so single keys like 'q' are detected without Enter
+readline.emitKeypressEvents(process.stdin);
+if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+}
+
+process.stdin.on("keypress", (str, key) => {
+    // Instant quit on 'q' or Ctrl+C
+    if (key && (key.name === "q" || str === "q" || str === "Q" || (key.ctrl && key.name === "c"))) {
+        console.log("\nGoodbye! 👋");
+        if (process.stdin.isTTY) {
+            process.stdin.setRawMode(false);
+        }
+        process.exit(0);
+    }
+});
+
+rl.on("close", () => {
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+    }
+});
+
 const songs = [
     "Blinding Lights",
     "Starboy",
@@ -49,7 +72,7 @@ function showInterface() {
     console.log("3 → Next");
     console.log("4 → Previous");
     console.log("5 → Show Playlist");
-    console.log("6 → Exit");
+    console.log("6 → Exit (or press 'q')");
     console.log("----------------------------------------");
 }
 
@@ -81,7 +104,7 @@ function askCommand() {
             showPlaylist();
         }
 
-        else if (choice === "6") {
+        else if (choice === "6" || choice.trim().toLowerCase() === "q") {
             console.log("\nGoodbye! 👋");
             rl.close();
         }
@@ -135,7 +158,12 @@ function showPlaylist() {
 
 function askAgain() {
 
-    rl.question("\nPress Enter to continue...", () => {
+    rl.question("\nPress Enter to continue (or 'q' to quit)... ", (input) => {
+        if (input.trim().toLowerCase() === "q") {
+            console.log("\nGoodbye! 👋");
+            rl.close();
+            return;
+        }
         askCommand();
     });
 }
